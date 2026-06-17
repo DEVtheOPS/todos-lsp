@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::cli::args::ScanArgs;
+use crate::cli::args::{OutputArg, ScanArgs};
 use crate::cli::render;
 use crate::core::config::{OutputFormat, RuntimeConfig};
 use crate::core::errors::TodoError;
@@ -13,7 +13,7 @@ pub fn run(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> Result<i32, TodoError> {
-    let config = RuntimeConfig::from_scan_args(&args)?;
+    let config = runtime_config_from_scan_args(&args)?;
     let request = DiskScanRequest {
         root: std::env::current_dir().map_err(TodoError::from)?,
         paths: args.paths,
@@ -35,6 +35,40 @@ pub fn run(
     }
 }
 
+fn runtime_config_from_scan_args(args: &ScanArgs) -> Result<RuntimeConfig, TodoError> {
+    let todo_types = match &args.todo_types {
+        Some(value) => value
+            .split(',')
+            .map(str::trim)
+            .filter(|item| !item.is_empty())
+            .map(ToOwned::to_owned)
+            .collect::<Vec<_>>(),
+        None => crate::core::config::default_todo_types(),
+    };
+
+    RuntimeConfig {
+        todo_types,
+        output: match args.output.unwrap_or(OutputArg::Default) {
+            OutputArg::Default => OutputFormat::Default,
+            OutputArg::Github => OutputFormat::Github,
+            OutputArg::Json => OutputFormat::Json,
+        },
+        blame: args.blame,
+        excludes: args.excludes.clone(),
+        exclude_dirs: args.exclude_dirs.clone(),
+        exclude_hidden: args.exclude_hidden,
+        follow_symlinks: args.follow,
+        ignore_file_names: args.ignore_file_names.clone(),
+        include_vcs: args.include_vcs,
+        include_generated: args.include_generated,
+        include_vendored: args.include_vendored,
+        labels: args.labels.clone(),
+        no_error_on_unsupported: args.no_error_on_unsupported,
+        charset: args.charset.clone(),
+    }
+    .validate()
+}
+
 pub fn run_for_paths(paths: Vec<PathBuf>, config: RuntimeConfig) -> Result<String, TodoError> {
     let request = DiskScanRequest {
         root: std::env::current_dir().map_err(TodoError::from)?,
@@ -51,7 +85,7 @@ mod tests {
 
     use tempfile::tempdir;
 
-    use super::{run, run_for_paths};
+    use super::{run, run_for_paths, runtime_config_from_scan_args};
     use crate::cli::args::{OutputArg, ScanArgs};
     use crate::core::config::RuntimeConfig;
 
@@ -116,5 +150,33 @@ mod tests {
 
         std::env::set_current_dir(old_dir).expect("restore dir");
         assert!(output.contains("sample.rs:1:// TODO: helper output"));
+    }
+
+    #[test]
+    fn translates_cli_scan_args_to_runtime_config() {
+        let config = runtime_config_from_scan_args(&ScanArgs {
+            blame: true,
+            charset: String::from("detect"),
+            excludes: vec![String::from("target")],
+            exclude_dirs: vec![String::from("vendor")],
+            exclude_hidden: true,
+            follow: true,
+            ignore_file_names: vec![String::from(".ignore")],
+            include_vcs: true,
+            include_generated: true,
+            include_vendored: true,
+            labels: vec![String::from("owner")],
+            no_error_on_unsupported: true,
+            output: Some(OutputArg::Json),
+            todo_types: Some(String::from("TODO,FIXME")),
+            paths: vec![std::path::PathBuf::from(".")],
+        })
+        .expect("config translates");
+
+        assert_eq!(config.todo_types, ["TODO", "FIXME"]);
+        assert_eq!(config.output, crate::core::config::OutputFormat::Json);
+        assert!(config.blame);
+        assert!(config.follow_symlinks);
+        assert_eq!(config.labels, ["owner"]);
     }
 }

@@ -112,10 +112,18 @@ impl SessionState {
                 .and_then(|name| name.to_str())
                 .map(String::from),
             config: self.config.clone(),
-            workspace_root: Some(resolve_workspace_root(&path)),
+            workspace_root: Some(self.workspace_root_for_path(&path)),
         };
         let findings = scan::scan_text(&request)?;
         self.index.upsert_overlay(uri.clone(), findings);
         Ok(self.diagnostics(&uri))
+    }
+
+    fn workspace_root_for_path(&self, path: &std::path::Path) -> PathBuf {
+        self.workspace_roots
+            .iter()
+            .find(|root| path.starts_with(root))
+            .cloned()
+            .unwrap_or_else(|| resolve_workspace_root(path))
     }
 }

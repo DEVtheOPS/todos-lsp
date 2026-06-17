@@ -12,6 +12,24 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Provision pinned upstream parity binary
+        run: |
+          mkdir -p .tmp
+          go install github.com/ianlewis/todos/cmd/todos@v0.14.0
+          cp "$(go env GOPATH)/bin/todos" .tmp/todos-upstream
+          chmod +x .tmp/todos-upstream
+          .tmp/todos-upstream --version
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --all-features -- -D warnings
+      - run: cargo test --all-targets
+        env:
+          UPSTREAM_TODOS_BIN: .tmp/todos-upstream
+      - run: cargo test --test parity_cli
+        env:
+          UPSTREAM_TODOS_BIN: .tmp/todos-upstream
       - run: cargo package
       - run: cargo publish --dry-run
       - run: cargo test --test release_smoke

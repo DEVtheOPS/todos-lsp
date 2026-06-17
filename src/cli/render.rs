@@ -28,13 +28,22 @@ pub fn render_github(findings: &[Finding]) -> String {
         .map(|finding| {
             format!(
                 "::warning file={},line={}::{}",
-                finding.display_path(),
+                escape_github_annotation(&finding.display_path()),
                 finding.range.start.line + 1,
-                finding.raw_text
+                escape_github_annotation(&finding.raw_text)
             )
         })
         .collect::<Vec<_>>();
     format!("{}\n", lines.join("\n"))
+}
+
+fn escape_github_annotation(value: &str) -> String {
+    value
+        .replace('%', "%25")
+        .replace('\r', "%0D")
+        .replace('\n', "%0A")
+        .replace(':', "%3A")
+        .replace(',', "%2C")
 }
 
 pub fn render_json(findings: &[Finding]) -> Result<String, serde_json::Error> {
@@ -106,8 +115,11 @@ mod tests {
 
     #[test]
     fn renders_github_output() {
-        let finding = sample_finding();
+        let mut finding = sample_finding();
+        finding.path = std::path::PathBuf::from("src/a%b:c,d\r\nlib.rs");
+        finding.raw_text = String::from("// TODO: 100% done\r\nnext: item, ok");
         let output = render_github(&[finding]);
-        assert!(output.contains("::warning file=src/lib.rs,line=1::// TODO: sample"));
+        assert!(output.contains("file=src/a%25b%3Ac%2Cd%0D%0Alib.rs"));
+        assert!(output.contains("::// TODO%3A 100%25 done%0D%0Anext%3A item%2C ok"));
     }
 }

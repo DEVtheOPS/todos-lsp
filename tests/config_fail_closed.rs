@@ -4,11 +4,12 @@ use todos_lsp::core::config::RuntimeConfig;
 
 #[test]
 fn invalid_config_fails_closed() {
-    let dir = tempdir().expect("tempdir");
-    let path = dir.path().join("todos.json");
-    std::fs::write(&path, "{not-json}").expect("config written");
-
-    let error = RuntimeConfig::from_file(&path).expect_err("config should fail");
+    let error = RuntimeConfig {
+        todo_types: Vec::new(),
+        ..RuntimeConfig::default()
+    }
+    .validate()
+    .expect_err("config should fail");
     assert!(error.to_string().contains("invalid config"));
 }
 

@@ -28,16 +28,13 @@ fn run_blame(path: &Path, line: u32, executable: &Path) -> Result<BlameInfo, Tod
         )));
     };
 
+    let line_range = format!("{line},{line}");
+    let filename = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or_default();
     let output = Command::new(executable)
-        .args([
-            "blame",
-            "--porcelain",
-            "-L",
-            &format!("{line},{line}"),
-            path.file_name()
-                .and_then(|name| name.to_str())
-                .unwrap_or_default(),
-        ])
+        .args(blame_args(&line_range, filename))
         .current_dir(parent)
         .output()
         .map_err(|_| {
@@ -54,6 +51,17 @@ fn run_blame(path: &Path, line: u32, executable: &Path) -> Result<BlameInfo, Tod
     }
 
     parse_porcelain(&String::from_utf8_lossy(&output.stdout))
+}
+
+fn blame_args(line_range: &str, filename: &str) -> Vec<String> {
+    vec![
+        String::from("blame"),
+        String::from("--porcelain"),
+        String::from("-L"),
+        line_range.to_string(),
+        String::from("--"),
+        filename.to_string(),
+    ]
 }
 
 fn parse_porcelain(output: &str) -> Result<BlameInfo, TodoError> {
@@ -83,7 +91,7 @@ pub fn git_executable() -> PathBuf {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_porcelain;
+    use super::{blame_args, parse_porcelain};
 
     #[test]
     fn parses_porcelain_output() {
@@ -101,5 +109,15 @@ mod tests {
         let error = parse_porcelain("deadbeef 1 1 1\nauthor Example Dev\n")
             .expect_err("porcelain should fail");
         assert!(error.to_string().contains("unable to parse"));
+    }
+
+    #[test]
+    fn blame_args_delimit_revisions_from_paths() {
+        let args = blame_args("1,1", "--looks-like-revision.rs");
+        assert!(args.iter().any(|arg| arg == "--"));
+        assert_eq!(
+            args.last().map(String::as_str),
+            Some("--looks-like-revision.rs")
+        );
     }
 }

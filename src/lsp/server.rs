@@ -7,6 +7,8 @@ use crate::core::errors::TodoError;
 use crate::lsp::session::SessionState;
 use crate::lsp::translate;
 
+const MAX_FRAME_SIZE: usize = 1024 * 1024;
+
 pub fn serve_stdio() -> Result<(), TodoError> {
     let stdin = std::io::stdin();
     let stdout = std::io::stdout();
@@ -178,6 +180,12 @@ fn read_message(reader: &mut dyn BufRead) -> Result<Option<Value>, TodoError> {
         return Ok(None);
     };
 
+    if content_length > MAX_FRAME_SIZE {
+        return Err(TodoError::InvalidConfig(format!(
+            "content length exceeds maximum LSP frame size: {content_length} > {MAX_FRAME_SIZE}"
+        )));
+    }
+
     let mut body = vec![0; content_length];
     reader.read_exact(&mut body)?;
     Ok(Some(serde_json::from_slice(&body)?))
@@ -198,7 +206,7 @@ mod tests {
     use serde_json::json;
     use tempfile::tempdir;
 
-    use super::{read_message, serve_transport};
+    use super::{read_message, serve_transport, MAX_FRAME_SIZE};
 
     fn frame(message: &serde_json::Value) -> Vec<u8> {
         let body = serde_json::to_vec(message).expect("json body");
@@ -270,5 +278,13 @@ mod tests {
         assert_eq!(messages[2]["result"].as_array().map(Vec::len), Some(1));
         assert_eq!(messages[3]["result"].as_array().map(Vec::len), Some(1));
         assert!(messages[4]["result"].is_null());
+    }
+
+    #[test]
+    fn rejects_oversized_content_length() {
+        let input = format!("Content-Length: {}\r\n\r\n", MAX_FRAME_SIZE + 1);
+        let mut cursor = Cursor::new(input.into_bytes());
+        let error = read_message(&mut cursor).expect_err("oversized frame should fail closed");
+        assert!(error.to_string().contains("content length exceeds"));
     }
 }

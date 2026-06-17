@@ -11,12 +11,21 @@ pub struct CommandObservation {
 
 #[allow(dead_code)]
 pub fn upstream_binary() -> Option<PathBuf> {
-    std::env::var_os("UPSTREAM_TODOS_BIN")
+    let binary = std::env::var_os("UPSTREAM_TODOS_BIN")
         .map(PathBuf::from)
+        .map(|path| path.canonicalize().unwrap_or(path))
         .or_else(|| {
             let candidate = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(".tmp/todos-upstream");
             candidate.exists().then_some(candidate)
-        })
+        });
+
+    if binary.is_none() && std::env::var_os("CI").is_some() {
+        panic!(
+            "pinned upstream todos binary is required in CI; set UPSTREAM_TODOS_BIN or provision .tmp/todos-upstream"
+        );
+    }
+
+    binary
 }
 
 #[allow(dead_code)]
