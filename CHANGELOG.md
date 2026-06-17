@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project follows semantic versioning. The current MVP release candidate is not final-public-release ready until the manual Zed dev-extension validation gate is completed.
 
+## [0.2.0](https://github.com/DEVtheOPS/todos-lsp/compare/todos-lsp-v0.1.0...todos-lsp-v0.2.0) (2026-06-17)
+
+
+### Features
+
+* bootstrap todos-lsp mvp ([5e12624](https://github.com/DEVtheOPS/todos-lsp/commit/5e12624aa26995ddcf7b47c6ceaa7e413de45542))
+
+
+### Bug Fixes
+
+* resolve review blockers ([cdf275a](https://github.com/DEVtheOPS/todos-lsp/commit/cdf275aa457aabc17f4f622d9fb9c4ee537582e9))
+
 ## [0.1.0-rc.1] - 2026-05-16
 
 ### Added
