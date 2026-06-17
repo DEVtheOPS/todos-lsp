@@ -2,34 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
-This project follows semantic versioning. The current MVP release candidate is not final-public-release ready until the manual Zed dev-extension validation gate is completed.
+This project follows semantic versioning. Release automation is managed by release-please.
 
-## [0.1.0-rc.1] - 2026-05-16
+## [Unreleased]
 
 ### Added
-- Initial Zed extension MVP that launches an external Rust `todo-lsp` language server.
-- Host-agnostic Rust scanner core for configurable TODO/FIXME-style markers.
-- Workspace and open-buffer scanning with include/exclude glob support and maximum file-size guardrails.
-- Low-severity LSP diagnostics with source `todo-lsp` for navigation through Zed's built-in Diagnostics UI.
-- Default marker support for `@TODO:`, `@FIXME:`, `TODO:`, `FIXME:`, `BUG:`, `HACK:`, `XXX:`, `[ ]`, and `[x]`.
-- Markdown task detection for open and completed checklist items.
-- User configuration through `lsp.todo-lsp.settings`, including tags, case sensitivity, boundary matching, globs, comment-aware policy, file-size limit, and diagnostic severity.
-- Trusted binary-path configuration for `todo-lsp`; the extension fails closed rather than executing a workspace-local fallback binary.
-- Documentation for MVP scope, settings, build commands, known limitations, and manual Zed dev-extension validation.
+- Standalone Rust `todos-lsp` binary with parity-oriented CLI scanning.
+- `todos-lsp serve` Language Server Protocol entrypoint over stdio.
+- Shared internal finding model used by the CLI and LSP adapters.
+- LSP diagnostics for open buffers, overlay-aware workspace symbols, and the `todos-lsp.listTodos` execute-command surface.
+- Release-please-based release flow for the single Cargo package.
+- Cargo publishing validation through `cargo package` and `cargo publish --dry-run`.
 
 ### Fixed
-- Cleared code review and security review blockers before release-candidate preparation.
-- Passed automated validation reported in session context: Rust tests, clippy, formatting, native build, WASM build, and coverage review.
+- Closed the documented MVP parity matrix with zero blocked rows against the pinned `ianlewis/todos` v0.14.0 binary.
+- Added fail-closed handling for missing parity tooling and required runtime dependencies.
+- Aligned open-buffer LSP scans with workspace-relative CLI path behavior.
 
 ### Changed
-- Re-scoped the original TODO Tree-style request into a supported diagnostics-first MVP because public Zed extension APIs do not currently expose custom side panels/tree views or arbitrary editor decorations.
-- Deferred custom TODO side panel, marker colors, gutter icons, status badges, toolbar actions, and TODO-specific filtering/grouping UI until Zed exposes public APIs for those surfaces.
+- Reframed upstream compatibility as an MVP-only black-box behavioral reference.
+- Kept implementation and release packaging as one Rust package with internal module boundaries.
+- Documented that post-MVP development is independent and is not bound to ongoing upstream lockstep.
 
 ### Removed
-- No shipped functionality removed; this is the first MVP release candidate.
+- Removed stale Zed-extension release-candidate notes from the project changelog.
 
-### Known Limitations
-- [BLOCKER] Manual Zed dev-extension validation remains required before final public release, tagging, deployment, or publication.
-- TODOs appear through Zed diagnostics and may be displayed alongside compiler/linter diagnostics.
-- Cross-language attachment depends on Zed language-server registration behavior and must be validated on the target Zed channel.
-- `comment_aware = "prefer_comments_fallback_to_lines"` currently falls back to line-based matching and may report markers in strings or non-comment text.
+### Release notes
+- This release is not published until maintainers merge the release-please release PR and the tagged publish workflow succeeds.
+- Install from crates.io only after publication with `cargo install todos-lsp`.
+- For local validation before publication, build from the repository with `cargo build --release` and run `./target/release/todos-lsp --help`.

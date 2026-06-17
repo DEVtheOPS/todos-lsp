@@ -9,11 +9,13 @@ The MVP parity goal is intentionally version-pinned and finite. After the bootst
 
 ## Installation
 
-Install from crates.io once published:
+Install from crates.io after the package is published:
 
 ```sh
 cargo install todos-lsp
 ```
+
+The MVP release is not published until maintainers merge the release-please release PR and the tagged publish workflow succeeds.
 
 For local development or release validation, build from the repository:
 
@@ -39,20 +41,23 @@ todos-lsp -o json src tests
 Common parity-oriented flags include:
 
 ```sh
-todos-lsp --label owner -o json .
+todos-lsp --labels owner -o json .
 todos-lsp --charset detect .
 todos-lsp --follow .
 todos-lsp --blame .
-todos-lsp --no-error-on-unsupported path/to/file.txt
+todos-lsp --no-error-on-unsupported tests/fixtures/unsupported/plain.txt
 ```
 
 TODO comments are reported through one shared internal finding model used by both the CLI and LSP paths.
+That model is an implementation boundary inside this single package, not a public Rust library API.
 
 ## CLI parity scope
 
 The bootstrap CLI parity target is `ianlewis/todos` v0.14.0 only. The parity harness compares observable behavior against a pinned upstream binary for the documented MVP rows, including recursive scans, unsupported input handling, JSON shape, labels, charset fallback, symlink traversal, representative language support, blame output, and multi-line block comment `comment_line` behavior.
 
 CI and release validation require the pinned upstream binary and run the parity suite fail-closed. Missing parity tooling must block validation rather than silently skipping evidence.
+
+The current parity matrix and provenance workflow are documented in [`docs/parity/matrix.md`](docs/parity/matrix.md) and [`docs/parity/provenance.md`](docs/parity/provenance.md).
 
 ## Language server
 
@@ -77,6 +82,8 @@ cargo publish --dry-run
 ```
 
 Publishing uses Cargo's `CARGO_REGISTRY_TOKEN` environment variable. Tokens are not passed on the command line.
+
+Release notes are maintained in [`CHANGELOG.md`](CHANGELOG.md). A crates.io install command in this README is an installation path, not evidence that the current version has already been published.
 
 ## Clean-room and MVP-only parity
 

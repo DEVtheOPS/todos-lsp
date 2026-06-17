@@ -1,7 +1,7 @@
 # ADR-001: Single-Package Module Architecture for MVP
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 `todos-lsp` needs the smallest architecture that still protects the approved MVP constraints:

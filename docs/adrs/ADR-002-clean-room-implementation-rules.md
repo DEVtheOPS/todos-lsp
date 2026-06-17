@@ -1,7 +1,7 @@
 # ADR-002: Clean-Room Implementation Rules
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 `todos-lsp` is a standalone Rust rewrite that targets MVP behavioral parity with `ianlewis/todos` v0.14.0 for the initial release only, while preserving an MPL-2.0 clean-room posture and long-term product independence. The team needs explicit implementation and review rules so parity work does not drift into source-derived copying.

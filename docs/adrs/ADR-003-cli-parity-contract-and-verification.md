@@ -1,7 +1,7 @@
 # ADR-003: CLI Parity Contract and Verification
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 `todos-lsp` MVP must be a clean-room Rust rewrite that existing `ianlewis/todos` users can adopt for CLI use without behavioral surprises, while also living inside the approved unified `todos-lsp` binary alongside `todos-lsp serve`. The project is explicitly pinned to `ianlewis/todos` v0.14.0 for MVP parity only, must keep CLI and LSP on the same core finding model, and must prove parity through reviewable evidence rather than approximation.

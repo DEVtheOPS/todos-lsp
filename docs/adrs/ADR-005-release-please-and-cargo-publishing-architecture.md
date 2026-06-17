@@ -1,7 +1,7 @@
 # ADR-005: Release-Please and Cargo Publishing Architecture
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 `todos-lsp` needs a release architecture that matches the approved MVP product shape: one project, one user-facing binary, GitHub Actions automation, release-please-managed versioning/changelog flow, and Cargo/crates.io publication. The release design must also align with the tightened MVP architecture direction recorded in session context: one publishable Rust package named `todos-lsp`, with internal module boundaries for shared core, CLI, and LSP concerns kept inside that package and not published as separate crates during MVP.

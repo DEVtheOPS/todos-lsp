@@ -1,7 +1,7 @@
 # ADR-004: LSP Architecture and Command Surface
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 `todos-lsp` must ship a first-party LSP server without introducing a second user-facing binary or a second scanning implementation. The MVP is explicitly constrained to a unified `todos-lsp` binary with `todos-lsp serve` as the LSP entrypoint, diagnostics plus `workspace/symbol` as the supported LSP features, open-buffer scanning for unsaved editor text, remote-friendly deployment on developer hosts, and shared core reuse with the CLI.
