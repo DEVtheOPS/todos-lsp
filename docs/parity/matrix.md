@@ -1,0 +1,21 @@
+# todos-lsp MVP Parity Matrix
+
+The MVP parity target is `ianlewis/todos` `v0.14.0` for the bootstrap release only.
+
+| ID | Upstream capability | `todos-lsp` command mapping | Dimensions | Fixture IDs | Evidence | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| CLI-001 | Default recursive scan | `todos-lsp [PATH...]` | output, exit, ignore, parser reuse | `basic-default-scan` | `cargo test --test parity_cli compares_todos_lsp_to_pinned_upstream_for_mvp_rows` | Pass | JSON output and finding exit code match on authored corpus. |
+| CLI-002 | Direct unsupported file error | `todos-lsp PATH` | stderr contract, exit code | `direct-unsupported` | `cargo test --test parity_cli compares_unsupported_file_behavior_to_pinned_upstream` | Pass | Behavioral parity compares exit code and error contract, not binary-name wording. |
+| CLI-003 | JSON output shape | `todos-lsp -o json [PATH...]` | field mapping, ordering, newline behavior | `basic-default-scan` | `cargo test --test cli_render --test parity_cli` | Pass | Output uses shared finding model. |
+| CLI-004 | Unsupported file suppression flag | `todos-lsp --no-error-on-unsupported PATH` | output suppression, exit semantics | `direct-unsupported` | `cargo test --test parity_cli matches_no_error_on_unsupported_behavior` | Pass | Suppression behavior matches the upstream command. |
+| CLI-005 | Label filtering | `todos-lsp -l owner -o json [PATH...]` | glob filter behavior, exit semantics | `basic-default-scan` | `cargo test --test parity_cli matches_label_filter_behavior` | Pass | Shared core filtering matches the upstream result set. |
+| CLI-006 | Charset detection fallback | `todos-lsp --charset detect [PATH...]` | decoding fallback, output, exit | temp latin-1 fixture | `cargo test --test parity_cli matches_charset_detect_behavior` | Pass | Lossy decode path now matches the observed upstream behavior on authored non-UTF8 input. |
+| CLI-007 | Symlink traversal semantics | `todos-lsp .` and `todos-lsp --follow .` | default traversal, explicit follow behavior | temp symlink fixture | `cargo test --test parity_cli matches_symlink_traversal_behavior` | Pass | Default traversal avoids nested symlink directories; `--follow` includes them. |
+| CLI-008 | Representative expanded language support | `todos-lsp -o json .` | discovery + parser support across multiple comment styles | temp mixed-language corpus | `cargo test --test parity_cli matches_mixed_language_support_behavior` | Pass | Verified for Go, Java, Kotlin, C block comments, Terraform/HCL-style hash comments, Lua, Ruby, GraphQL, HTML, ERB, ignore lists, and git config. |
+| CLI-009 | Blame success path | `todos-lsp --blame .` | git repo success path, stdout format, exit semantics | temp git repo | `cargo test --test parity_cli matches_blame_success_behavior` | Pass | Local blame path now resolves absolute file paths before invoking git. |
+| CLI-010 | Shared TODO normalization | CLI + LSP shared core | todo type, label, message, location | `basic-default-scan` | `cargo test --test core_scan --test lsp_diagnostics --test lsp_workspace_symbols` | Pass | CLI and LSP consume the same core finding fields. |
+| CLI-011 | Fail-closed missing dependency handling | `todos-lsp --blame` | explicit failure, no partial results | authored temp repo cases | `cargo test --test config_fail_closed` | Pass | Missing runtime dependency returns an explicit error. |
+| CLI-012 | Multi-line block comment parity | `todos-lsp -o json .` on `/* ... TODO ... */` | multi-line block parsing, `comment_line` parity | temp C fixture | `cargo test --test parity_cli matches_multiline_block_comment_behavior` | Pass | Upstream emits a finding from the TODO line and preserves the block-start `comment_line`; local shared model now carries separate `comment_line` parity. |
+| CLI-013 | Elixir support-table closure | `todos-lsp -o json .` on `.ex` files | discovery + parser coverage for the identified pinned support-table gap | temp Elixir fixture | `cargo test --test parity_cli matches_elixir_hash_comment_behavior` | Pass | `.ex`/`.exs` files are discovered and parsed with hash comments, matching the observed pinned upstream Elixir behavior. |
+
+Current local parity gap count: **0 blocked rows**.

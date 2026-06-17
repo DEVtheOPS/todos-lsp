@@ -1,0 +1,29 @@
+[package]
+name = "todos-lsp"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+description = "Standalone TODO scanner with CLI parity and LSP support"
+repository = "https://github.com/devtheops/todos-lsp"
+readme = "README.md"
+keywords = ["todo", "lsp", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "todos-lsp"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+glob = "0.3"
+ignore = "0.4"
+lsp-types = "0.97"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+url = "2.5"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.1"
+tempfile = "3.10"
